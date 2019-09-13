@@ -1,11 +1,21 @@
 package main
 
 import (
-    "fmt"
+	"fmt"
+	"strconv"
 )
-func main() {
-    t, f := true, false
-    fmt.Printf("%T %v %t\n", t, t, t) // bool型じゃないと正しく表示しない%t
-    fmt.Printf("%T %v %t\n", f, f, 0) //  %!t(int=0)となりbool型じゃないと出る
 
+func main() {
+	var x int = 1
+	xx := float64(x)
+	fmt.Printf("%T %v %f\n", xx, xx, xx) // %f float表記
+	var y float64 = 1.2
+	yy := int(y)
+	fmt.Printf("%T %v %d\n", yy, yy, yy)
+
+	var s string = "14"
+	// i := int(s); // 14にはならない
+	// コンバートするには
+	i, _ := strconv.Atoi(s)
+	fmt.Printf("%T %v", i, i) // Atoi アスキートゥインテジャー
 }
