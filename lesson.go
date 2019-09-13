@@ -2,20 +2,10 @@ package main
 
 import (
     "fmt"
-    "strings"
 )
 func main() {
-    fmt.Println("Hello World")
-    fmt.Println("Hello" + "World")
-    fmt.Println(string("HelloWorld"[0]))
-    var s string = "Hello World"
-    s = strings.Replace(s, "H", "W", 1) // 最初の1つめ
-    fmt.Println(s)
-    fmt.Println(`
-        Test
-                Test
-    Test
-    `)
-    fmt.Println("\"")
-    fmt.Println(`"`)
+    t, f := true, false
+    fmt.Printf("%T %v %t\n", t, t, t) // bool型じゃないと正しく表示しない%t
+    fmt.Printf("%T %v %t\n", f, f, 0) //  %!t(int=0)となりbool型じゃないと出る
+
 }
