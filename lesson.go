@@ -4,32 +4,20 @@ import (
 	"fmt"
 )
 
+func one(x *int) { // アドレスの中身を型(ポイント型)にしている アスタリスク型
+	*x = 1 // xにはあたいは入れられないので デリファレンス(*x)にして値を入れる。中身に1をいれている
+}
 func main() {
-	// 一番少ない値を出力するコード
-	l := []int{100, 300, 23, 11, 23, 2, 4, 6, 4}
-	var min int
-	for i, num := range l {
-		if i == 0 {
-			min = num
-			continue
-		}
-		if min >= num {
-			min = num
-		}
-	}
-	fmt.Println("min is", min)
-	// 合計を出力するコード
-	m := map[string]int{
-		"apple":  200,
-		"banana": 300,
-		"grapes": 150,
-		"orange": 80,
-		"papaya": 500,
-		"kiwi":   90,
-	}
-	sum := 0
-	for _, v := range m {
-		sum += v // 足す時
-	}
-	fmt.Println(sum)
+	var n int = 100
+	one(&n)           //　アドレス型を渡している アンンパサンド ポイント型にはアドレス型を渡さないといけない
+	fmt.Println(n)    // 1 中身が書き換わった
+	fmt.Println(&*&n) // メモリのアドレスが出力される
+
+	fmt.Println(n)
+	fmt.Println(&n)
+	var p *int = &n // integerのポイント型 16真数 4バイトなので4ずつ増えている *intはアドレスが入る実態の型(ポイント型)
+	fmt.Println(p)
+	fmt.Println(*p) // ポイント型のpに入っているアドレスが指しているメモリの値を指している
+	// ＆はアドレス
+	// * はアドレスの実態を参照している
 }
