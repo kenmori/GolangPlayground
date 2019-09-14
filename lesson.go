@@ -7,14 +7,17 @@ import (
 func main() {
 	// 一番少ない値を出力するコード
 	l := []int{100, 300, 23, 11, 23, 2, 4, 6, 4}
-	var min [1]int
-	for i, v := range l {
-		fmt.Println(i, v)
-		if min[0] > v {
-			min[0] = v
+	var min int
+	for i, num := range l {
+		if i == 0 {
+			min = num
+			continue
+		}
+		if min >= num {
+			min = num
 		}
 	}
-	fmt.Println("min is", min[0])
+	fmt.Println("min is", min)
 	// 合計を出力するコード
 	m := map[string]int{
 		"apple":  200,
@@ -24,9 +27,9 @@ func main() {
 		"papaya": 500,
 		"kiwi":   90,
 	}
-	var amont int
+	sum := 0
 	for _, v := range m {
-		amont = +v
+		sum += v // 足す時
 	}
-	fmt.Println(amont)
+	fmt.Println(sum)
 }
