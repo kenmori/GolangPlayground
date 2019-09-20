@@ -1,23 +1,31 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"io/ioutil"
-	"log"
+	"net/http"
+	"net/url"
 )
 
 func main() {
-	fmt.Println("Hello, playground")
-	content, err := ioutil.ReadFile("main.go")
-	if err != nil {
-		log.Fatalln(err)
-	}
-	fmt.Println(string(content))
-	if err := ioutil.WriteFile("ioutil_temp.go", content, 0666); err != nil { // errしか返さないので1lineで書ける
-		log.Fatalln(err)
-	}
-	r := bytes.NewBuffer([]byte("abc")) //　バイトにする
-	content2, _ := ioutil.ReadAll(r)    // errorハンドルなしなので_にしている。バイトを読み込む
-	fmt.Println(string(content2))       // stringをバイトにデータコンバージョン
+	// resp, _ := http.Get("http://example.com")
+	// defer resp.Body.Close()
+	// body, _ := ioutil.ReadAll(resp.Body)
+	// fmt.Println(string(body)
+	base, _ := url.Parse("http://example.com") // check invalid url
+	reference, _ := url.Parse("/test?a=1&b=2")
+	endpoint := base.ResolveReference(reference).String() // base urlにたいしてreferenceをつける
+	fmt.Println(endpoint)
+	req, _ := http.NewRequest("GET", endpoint, nil) // structをつくっているだけ
+	req.Header.Add("If-None-Match", `W/"wyzzy"`)
+	q := req.URL.Query()
+	q.Add("c", "3&%")
+	fmt.Println(q)
+	fmt.Println(q.Encode())       // &アンパサンドが入っている場合一度Encodeする必要がある
+	req.URL.RawQuery = q.Encode() // エンコードされたものを戻す
+
+	var client *http.Client = &http.Client{}
+	resp, _ := client.Do(req)
+	body, _ := ioutil.ReadAll(resp.Body)
+	fmt.Println(string(body))
 }
