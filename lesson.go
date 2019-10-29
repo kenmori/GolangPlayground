@@ -2,33 +2,26 @@ package main
 
 import (
 	"fmt"
+	"sync"
 )
 
-func do (i interface{}){ // どんな型でも受け取るので // interfaceのものの型を変更するのがタイプアサーション
-	// ss := i.(string)
-	// ii := i.(int) // ここでタイプアサーションしなくてはいけない
-	// ii *= 2
-	// fmt.Println(ii)
-	// fmt.Println(ss + "!")
-	switch v := i.(type) {
-		case int:
-			fmt.Printf("%T %d\n", v, v)
-		case string:
-			fmt.Printf("%T %s\n", v, v)
-		default:
-			fmt.Printf("i don know")
-
+// ゴルーチン 並列処理をする
+func goroutine (str string, wg *sync.WaitGroup) {
+	for i := 0; i < 5; i++ {
+		fmt.Println(str)
 	}
-	var a int = 10
-	aa := float64(10) // タイプコンバージョン。interfaceでないのでタイプアサーションではない
-	fmt.Println(a, aa)
-
+	wg.Done() // Add(1)なら1回Doneしないといけない
+}
+func normal (s string) {
+	for i := 0; i < 5; i++ {
+		fmt.Println(s)
+	}
 }
 func main() {
-	// var i interface{} = 10 //do(10)と同じ意味。10を代入したからといってiはintegerではないので。そのご受け取り側でType Assertionする必要がある
-	// do(i)
-	do(10)
-	do("Mike")
-	do(true)	
+	var wg sync.WaitGroup
+	wg.Add(1) // 1つのdoneされるまで待つ
+	go goroutine("world", &wg)
+	normal("hello")
+	wg.Wait() //待つ
 }
 
