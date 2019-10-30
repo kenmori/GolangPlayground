@@ -25,3 +25,8 @@ func main() {
 	wg.Wait() //待つ
 }
 
+
+// goroutineが終わる前に処理が終わってしまうのを防ぐためにsync.WaitGroupがある
+// wg.Add(1) // 一つの並列処理があるとことを伝える
+// goroutineに&wgを渡す
+
