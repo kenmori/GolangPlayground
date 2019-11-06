@@ -1,32 +1,23 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
-	"sync"
+	"io/ioutil"
+	"log"
 )
 
-// ゴルーチン 並列処理をする
-func goroutine (str string, wg *sync.WaitGroup) {
-	for i := 0; i < 5; i++ {
-		fmt.Println(str)
-	}
-	wg.Done() // Add(1)なら1回Doneしないといけない
-}
-func normal (s string) {
-	for i := 0; i < 5; i++ {
-		fmt.Println(s)
-	}
-}
 func main() {
-	var wg sync.WaitGroup
-	wg.Add(1) // 1つのdoneされるまで待つ
-	go goroutine("world", &wg)
-	normal("hello")
-	wg.Wait() //待つ
+	fmt.Println("Hello, playground")
+	content, err := ioutil.ReadFile("main.go")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	fmt.Println(string(content))
+	if err := ioutil.WriteFile("ioutil_temp.go", content, 0666); err != nil { // errしか返さないので1lineで書ける
+		log.Fatalln(err)
+	}
+	r := bytes.NewBuffer([]byte("abc")) //　バイトにする
+	content2, _ := ioutil.ReadAll(r)    // errorハンドルなしなので_にしている。バイトを読み込む
+	fmt.Println(string(content2))       // stringをバイトにデータコンバージョン
 }
-
-
-// goroutineが終わる前に処理が終わってしまうのを防ぐためにsync.WaitGroupがある
-// wg.Add(1) // 一つの並列処理があるとことを伝える
-// goroutineに&wgを渡す
-
