@@ -1,32 +1,57 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"net/url"
 )
 
-func main() {
-	// resp, _ := http.Get("http://example.com")
-	// defer resp.Body.Close()
-	// body, _ := ioutil.ReadAll(resp.Body)
-	// fmt.Println(string(body)
-	base, _ := url.Parse("http://example.com")            // check invalid url // POSTの場合https://が多い
-	reference, _ := url.Parse("/test?a=1&b=2")            // Getの時はこのように情報をわたし、
-	endpoint := base.ResolveReference(reference).String() // base urlにたいしてreferenceをつける
-	fmt.Println(endpoint)
-	req, _ := http.NewRequest("GET", endpoint, nil) // structをつくっているだけ
-	// req, _ := http.NewREquest("POST", endpoint, bytes.NewBuffer([]byte("password"))) // POSTの場合、bufferで領域を確保して情報を渡す。// bytes.NewBuffer([]byte("password")はbody
-	req.Header.Add("If-None-Match", `W/"wyzzy"`)
-	q := req.URL.Query()
-	q.Add("c", "3&%")
-	fmt.Println(q)
-	fmt.Println(q.Encode())       // &アンパサンドが入っている場合一度Encodeする必要がある
-	req.URL.RawQuery = q.Encode() // エンコードされたものを戻す
+type T struct{}
+type Person struct {
+	Name      string   `json:"name"`       // `json:"-"`でnameを-で隠す
+	Age       int      `json:"age,string"` // unmarshal時はintにして、marshal時はstringにする指定。,をつける。ageが0の時はkey?になり、見せないようにする `json:"age,omitempty"``
+	Nicknames []string `json:"nicknames"`
+	T         *T       `json:"T,omitempty"` // 実態を指定する*T
+}
 
-	var client *http.Client = &http.Client{}
-	resp, _ := client.Do(req)
-	body, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println(string(body))
+// omitempty・・・ ポインタの時はnil, sliceは[]string, intのときは0, stringは空のときに何も入っていない時表示させないのがomitempty
+
+// json.Marshalが呼ばれた時独自のカスタマイズをする方法
+// func (p Person) MarshalJSON() ([]byte, error) { //MarshalJSONの名前でなければダメ
+// 	// a := &struct{ Name string }{Name: "test"}
+// 	v, err := json.Marshal(&struct { // 上記のPersonのようなstructを関数内だけでつ買う場合、短絡的に書く方法
+// 		Name string
+// 	}{
+// 		Name: "Mr ." + p.Name,
+// 	})
+// 	return v, err
+// }
+
+// Unmarshalしたさいに呼ばれるカスタムUnmarshal
+func (p *Person) UnmarshalJSON(b []byte) error {
+	type Person2 struct {
+		Name string
+	}
+	var p2 Person2
+	err := json.Unmarshal(b, &p2)
+	if err != nil {
+		fmt.Println(err)
+	}
+	p.Name = p2.Name + "!"
+	return err
+}
+
+func main() {
+	b := []byte(`{ "name": "mike", "age": "20", "nicknames": ["a", "b", "c"]}`)
+	// b := []byte(`{ "Name": "mike", "ge": 20, "nicknames": ["a", "b", "c"]}`) // パブリックなのでロワーケースでもキャピタルでも入れてくれるが geはないのでこの場合 デフォルト値がはいる
+	var p Person
+	if err := json.Unmarshal(b, &p); err != nil { // ネットワークから得たデータをPerson Structのkeyをみて入れてくれるUnmarshal。参照先のアドレスと、データを渡す
+		fmt.Println(err)
+	}
+	fmt.Println(p.Name, p.Age, p.Nicknames)
+
+	// 以下 Personに入っているデータをJSONに戻してネットワーク越しに投げる
+	v, _ := json.Marshal(p) // vはこの時点ではbyte
+	fmt.Println(string(v))  // string　コンバージョンしてあげる // {"Name":"mike","Age":20,"Nicknames":["a","b","c"]}
+	// このままだとNameなどのkeyがstructと同じキャピタルのままになってしまっているので、Marshalする時はリテラルで指定してあげる -> `json:"name"`
+	// {"name":"mike","age":20,"nicknames":["a","b","c"]}
 }
