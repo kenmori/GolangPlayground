@@ -2,28 +2,30 @@ package main
 
 import (
 	"fmt"
-
-	"gopkg.in/ini.v1"
+	"io/ioutil"
 )
 
-var Config ConfigList
-
-type ConfigList struct {
-	Port      int
-	DbName    string
-	SQLDriver string
+type Page struct {
+	Title string
+	Body  []byte
 }
 
-func init() {
-	cfg, _ := ini.Load("config.ini")
-	Config = ConfigList{
-		Port:      cfg.Section("web").Key("port").MustInt(),
-		DbName:    cfg.Section("db").Key("name").MustString("example.sql"),
-		SQLDriver: cfg.Section("db").Key("driver").String(),
+func (p *Page) save() error {
+	filename := p.Title + ".txt"
+	return ioutil.WriteFile(filename, p.Body, 0600)
+}
+func loadPage(title string) (*Page, error) {
+	filename := title + ".txt"
+	body, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, err
 	}
+
+	return &Page{Title: title, Body: body}, nil
 }
 func main() {
-	fmt.Printf("%T %v\n", Config.Port, Config.Port)
-	fmt.Printf("%T %v\n", Config.DbName, Config.DbName)
-	fmt.Printf("%T %v\n", Config.SQLDriver, Config.SQLDriver)
+	p1 := &Page{Title: "text", Body: []byte("This is a sample page")}
+	p1.save()
+	p2, _ := loadPage(p1.Title)
+	fmt.Println(string(p2.Body))
 }
